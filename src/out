@@ -1,1 +1,0 @@
-gcc -Wall -g Main.c Ball.c -o Space_Blaster -lncurses
