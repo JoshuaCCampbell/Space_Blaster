@@ -15,6 +15,7 @@
 #include <ncurses.h>
 #include <unistd.h>
 #include "Entities/Ship.h"
+#include "Globals.h"
 
 #define IS_RUNNING 1
 #define DELAY 30000
