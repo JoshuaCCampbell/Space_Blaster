@@ -4,7 +4,7 @@ LIBS = -lncurses
 
 
 INCLUDE = Main.c Ship.c
-TARGET = Space_Blaster
+TARGET = ../builds/Space_Blaster
 
 
 all:
