@@ -12,18 +12,24 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <ncurses.h>
 #include <unistd.h>
-#include "Entities/Ship.h"
 #include "Globals.h"
+#include "Entities/Ship.h"
+#include "Entities/Blaster.h"
 
-#define DELAY 30000
+#define DELAY 35000
+#define NUM_PLAYER_SHOTS 5
 
 void initialize_ncurses();
 
 int main(int argc, char **argv)
 {
+    int i;
+
     Ship player;
+    Blaster player_blaster[2];
     int is_running = 1;
 
     /* ncurses setup */
@@ -31,18 +37,40 @@ int main(int argc, char **argv)
     initialize_ncurses();
     getmaxyx(stdscr, max_y, max_x);
  
-    /* DISPLAY */
+    /* Initialize entities */
     init_ship(&player, (max_x / 2) - 1, max_y - 1, 1);
+    
+    for(i = 0; i < NUM_PLAYER_SHOTS; ++i)
+    {
+        init_blaster(&player_blaster[i], 1);
+    }
 
     /* Main game loop */
     while(is_running)
     {
         int ch;
         clear();
+        ch = getch();
+
+        /* Test blaster location */
+        for(i = 0; i < NUM_PLAYER_SHOTS; ++i)
+        {
+            if(player_blaster[i].pos_y < 0)
+            {
+                player_blaster[i].active = 0;
+                player_blaster[i].pos_x = 0;
+                player_blaster[i].pos_y = 0;
+            }
+
+            if(player_blaster[i].active == 1)
+            {
+                draw_blaster(&player_blaster[i]);
+                move_blaster(&player_blaster[i]);
+            }
+        }
 
         draw_ship(&player);
 
-        ch = getch();
         switch(ch)
         {
             case KEY_F(1):  /* Quit */
@@ -50,8 +78,20 @@ int main(int argc, char **argv)
             case KEY_LEFT:
                 move_ship(&player, max_x, 'l');
             case KEY_RIGHT:
-                move_ship(&player, max_x, 'r');
+                move_ship(&player, max_x, 'r'); 
         }
+        
+        for(i = 0; i < NUM_PLAYER_SHOTS; ++i)
+        {
+            if(ch == KEY_UP && player_blaster[i].active == 0)
+            {
+                player_blaster[i].active = 1;
+                player_blaster[i].pos_x = player.pos_x + 1;
+                player_blaster[i].pos_y = player.pos_y - 1;
+                break;
+            }
+        }
+        
         refresh();
         usleep(DELAY);
 
@@ -65,6 +105,7 @@ void initialize_ncurses()
 {
     initscr(); /* init window */
     noecho(); /* don't echo keydowns */
+    nodelay(stdscr, TRUE);
     curs_set(FALSE); /* don't show cursor */
     keypad(stdscr, TRUE);
 }
