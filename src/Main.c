@@ -17,20 +17,14 @@
 #include "Entities/Ship.h"
 #include "Globals.h"
 
-#define IS_RUNNING 1
 #define DELAY 30000
-
-struct _ENTITY_ship
-{
-    int x, y;
-    int vel_x, vel_y;
-};
 
 void initialize_ncurses();
 
 int main(int argc, char **argv)
 {
-    SHIP ship;
+    Ship player;
+    int is_running = 1;
 
     /* ncurses setup */
     int max_x, max_y;
@@ -38,23 +32,25 @@ int main(int argc, char **argv)
     getmaxyx(stdscr, max_y, max_x);
  
     /* DISPLAY */
-    init_ship(&ship, (max_x / 2) - 1, max_y - 1, 1);
+    init_ship(&player, (max_x / 2) - 1, max_y - 1, 1);
 
     /* Main game loop */
-    while(IS_RUNNING)
+    while(is_running)
     {
         int ch;
         clear();
 
-        draw_ship(&ship);
+        draw_ship(&player);
 
         ch = getch();
         switch(ch)
         {
+            case KEY_F(1):  /* Quit */
+                is_running = 0;
             case KEY_LEFT:
-                move_ship(&ship, max_x, 'l');
+                move_ship(&player, max_x, 'l');
             case KEY_RIGHT:
-                move_ship(&ship, max_x, 'r');
+                move_ship(&player, max_x, 'r');
         }
         refresh();
         usleep(DELAY);
