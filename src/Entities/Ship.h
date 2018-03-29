@@ -4,6 +4,6 @@ typedef struct _ENTITY_Ship
     int vel_x, vel_y;
 }Ship;
 
-void init_ship(Ship *player, int start_x, int start_y, int velocity);
-void draw_ship(Ship *player);
-void move_ship(Ship *player, int max_x, char direction);
+void init_ship(Ship *ship, int start_x, int start_y, int velocity);
+void draw_ship(Ship *ship);
+void move_ship(Ship *ship, int max_x, char direction);
