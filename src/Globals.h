@@ -9,5 +9,8 @@
 *                                               *
 *************************************************/
 
-#define SHIP_SHAPE "-^-"
-#define SHIP_WIDTH 3
+#define PLAYER_SHAPE "-^-"
+#define PLAYER_WIDTH 3
+
+#define ENEMY_SHAPE "=v="
+#define ENEMY_WIDTH "3"

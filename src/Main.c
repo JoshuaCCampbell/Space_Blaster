@@ -29,7 +29,8 @@ int main(int argc, char **argv)
     int i;
 
     Ship player;
-    Blaster player_blaster[2];
+    Blaster player_blaster[5];
+    Ship alien;
     int is_running = 1;
 
     /* ncurses setup */
@@ -39,7 +40,7 @@ int main(int argc, char **argv)
  
     /* Initialize entities */
     init_ship(&player, (max_x / 2) - 1, max_y - 1, 1);
-    
+    init_ship(&alien, (max_x / 2) - 1, 5, 1); 
     for(i = 0; i < NUM_PLAYER_SHOTS; ++i)
     {
         init_blaster(&player_blaster[i], 1);
@@ -52,7 +53,11 @@ int main(int argc, char **argv)
         clear();
         ch = getch();
 
-        /* Test blaster location */
+        /* Draw ships */
+        draw_ship(&player, PLAYER_SHAPE);
+        draw_ship(&alien, ENEMY_SHAPE);
+
+        /* Check for blaster location */
         for(i = 0; i < NUM_PLAYER_SHOTS; ++i)
         {
             if(player_blaster[i].pos_y < 0)
@@ -62,14 +67,24 @@ int main(int argc, char **argv)
                 player_blaster[i].pos_y = 0;
             }
 
-            if(player_blaster[i].active == 1)
+            if(player_blaster[i].active)
             {
                 draw_blaster(&player_blaster[i]);
                 move_blaster(&player_blaster[i]);
             }
-        }
 
-        draw_ship(&player);
+            /* Blaster hit detection */
+            if(
+                    player_blaster[i].active && 
+                    player_blaster[i].pos_x >= alien.pos_x &&
+                    player_blaster[i].pos_x <= (alien.pos_x + 2) &&
+                    player_blaster[i].pos_y == alien.pos_y)
+            {
+                alien.pos_x = 0;
+                alien.pos_y = 0;
+                player_blaster[i].active = 0;
+            }
+        } 
 
         switch(ch)
         {
@@ -91,6 +106,8 @@ int main(int argc, char **argv)
                 break;
             }
         }
+
+        /* move_ship(&alien, max_x, 'l'); */
         
         refresh();
         usleep(DELAY);
