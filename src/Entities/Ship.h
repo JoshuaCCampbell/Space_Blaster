@@ -2,6 +2,7 @@ typedef struct _ENTITY_Ship
 {
     int pos_x, pos_y;
     int vel_x, vel_y;
+    int active;
 }Ship;
 
 void init_ship(Ship *ship, int start_x, int start_y, int velocity);

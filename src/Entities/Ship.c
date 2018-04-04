@@ -9,6 +9,7 @@ void init_ship(Ship *p_ship, int start_x, int start_y, int velocity)
     p_ship->pos_y = start_y;
     p_ship->vel_x = velocity;
     p_ship->vel_y = velocity;
+    p_ship->active = 1;
 }
 
 /* Draw ship */
