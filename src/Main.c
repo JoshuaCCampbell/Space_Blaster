@@ -42,17 +42,17 @@ int main(int argc, char **argv)
  
     /* Initialize entities */
     /****************************************************************/
-    init_ship(&player, (max_x / 2) - 1, max_y - 1, 1);
+    init_ship(&player, (max_x / 2) - 1, max_y - 1, 0, 1);
 
     for(i = 0; i < NUM_ALIENS; ++i)
     {
         if(i == 0)
         {
-            init_ship(&alien[i], 10 , 5, 1); 
+            init_ship(&alien[i], 10 , 5, rand() % 2, 1); 
         }
         else
         { 
-            init_ship(&alien[i], alien[i - 1].pos_x + alien_gap, 5, 1); 
+            init_ship(&alien[i], alien[i - 1].pos_x + alien_gap, 5, rand() % 2, 1); 
         }
     }
 
@@ -126,9 +126,9 @@ int main(int argc, char **argv)
             case KEY_F(1):  /* Quit */
                 is_running = 0;
             case KEY_LEFT:
-                move_ship(&player, max_x, 'l');
+                move_ship(&player, max_x, 0);
             case KEY_RIGHT:
-                move_ship(&player, max_x, 'r'); 
+                move_ship(&player, max_x, 1); 
         }
         
         /* Shoot blaster */
@@ -150,6 +150,16 @@ int main(int argc, char **argv)
             {
                 alien[i].pos_y++;
             }
+            
+            if(tick % 6 == 0 && alien[i].direction == 0)
+            {
+                alien[i].pos_x--;
+            }
+            if(tick % 6 == 0 && alien[i].direction == 1)
+            {
+                alien[i].pos_x++;
+            }
+
             if(alien[i].pos_y >= max_y)
             {
                 alien[i].pos_y = 0;
@@ -162,7 +172,7 @@ int main(int argc, char **argv)
 
         refresh();
         tick++;
-        if(tick == 60)
+        if(tick == TICK_BLOCK)
         {
             tick = 0;
         }

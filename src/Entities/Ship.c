@@ -3,12 +3,13 @@
 #include "Ship.h"
 
 /* Initialize ship */
-void init_ship(Ship *p_ship, int start_x, int start_y, int velocity)
+void init_ship(Ship *p_ship, int start_x, int start_y, int direction, int velocity)
 {
     p_ship->pos_x = start_x;
     p_ship->pos_y = start_y;
     p_ship->vel_x = velocity;
     p_ship->vel_y = velocity;
+    p_ship->direction = direction;
     p_ship->active = 1;
 }
 
@@ -19,12 +20,12 @@ void draw_ship(Ship *p_ship, const char *shape)
 }
 
 /* Set location for ship */
-void move_ship(Ship *p_ship, int max_x, char direction){
-    if(direction == 'l')
+void move_ship(Ship *p_ship, int max_x, int direction){
+    if(direction == 0)
     {
         p_ship->pos_x -= 2;
     }
-    else if(direction == 'r')
+    else if(direction == 1)
     {
        p_ship->pos_x++;
     }
