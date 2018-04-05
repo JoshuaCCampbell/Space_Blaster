@@ -25,6 +25,7 @@ int main(int argc, char **argv)
     /* Counters */
     int i;
     int j;
+    int tick = 0;
 
     /* Declare structs */
     Ship player;
@@ -65,6 +66,7 @@ int main(int argc, char **argv)
     while(is_running)
     {
         int ch;
+        int alive_aliens = 0;
         clear();
         ch = getch();
 
@@ -77,6 +79,7 @@ int main(int argc, char **argv)
             if(alien[i].active)
             {
                 draw_ship(&alien[i], ENEMY_SHAPE);
+                alive_aliens++;
             }
         }
 
@@ -106,7 +109,8 @@ int main(int argc, char **argv)
                         alien[j].active &&
                         player_blaster[i].pos_x >= alien[j].pos_x &&
                         player_blaster[i].pos_x <= (alien[j].pos_x + 2) &&
-                        player_blaster[i].pos_y == alien[j].pos_y)
+                        player_blaster[i].pos_y <= alien[j].pos_y &&
+                        player_blaster[i].pos_y >= alien[j].pos_y - 2)
                 {
                     alien[j].pos_x = 0;
                     alien[j].pos_y = 0;
@@ -140,8 +144,28 @@ int main(int argc, char **argv)
         }
 
         /* Move enemies here */
-        
+        for(i = 0; i < NUM_ALIENS; ++i)
+        {
+            if(tick % 3 == 0)
+            {
+                alien[i].pos_y++;
+            }
+            if(alien[i].pos_y >= max_y)
+            {
+                alien[i].pos_y = 0;
+                alien[i].pos_x = rand() % (max_x - 2);
+            }
+        }
+       
+        /* Print number of active aliens */
+        mvprintw(1, max_x - 10, "Aliens: %d", alive_aliens); 
+
         refresh();
+        tick++;
+        if(tick == 60)
+        {
+            tick = 0;
+        }
         usleep(DELAY);
     }
 
