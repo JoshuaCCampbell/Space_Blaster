@@ -30,7 +30,7 @@ void draw_entities(
             Ship *p_player,
             Blaster *p_playerblaster,
             Ship *p_alien,
-            int *alive_aliens,
+            int *p_alivealiens,
             int max_x,
             int max_y
         );
@@ -43,6 +43,7 @@ void move_entities(
             int ch, 
             int tick
         );
+void hit_detection(Blaster *p_playerblaster, Ship *alien);
 
 int main(int argc, char **argv)
 {
@@ -76,6 +77,9 @@ int main(int argc, char **argv)
 
         /* Move entities */
         move_entities(&player, player_blaster, alien, max_x, max_y, ch, tick);
+
+        /* Hit detection */
+        hit_detection(player_blaster, alien);
 
         /* Exit on F1 press */       
         if(ch == KEY_F(1))
@@ -121,10 +125,16 @@ void initialize_entities(
     int alien_gap = (max_x - 10)  / NUM_ALIENS;
     int i;
 
-    /* Init player */
+    /* Init player ship */
     init_ship(p_player, (max_x / 2) - 1, max_y - 1, 0, 1);
 
-    /* Init aliens */
+    /* Init player blasters */
+    for(i = 0; i < NUM_PLAYER_SHOTS; ++i)
+    {
+        init_blaster(&p_playerblaster[i], 1);
+    }
+
+    /* Init alien ships */
     for(i = 0; i < NUM_ALIENS; ++i)
     {
         if(i == 0)
@@ -136,71 +146,39 @@ void initialize_entities(
             init_ship(&p_alien[i], p_alien[i - 1].pos_x + alien_gap, 5, rand() % 2, 1); 
         }
     }
-
-    /* Init blaster */
-    for(i = 0; i < NUM_PLAYER_SHOTS; ++i)
-    {
-        init_blaster(&p_playerblaster[i], 1);
-    }   
+   
 }
 
 void draw_entities(
             Ship *p_player,
             Blaster *p_playerblaster,
             Ship *p_alien,
-            int *alive_aliens,
+            int *p_alivealiens,
             int max_x,
             int max_y
         )
 {
-    int i, j;
-
+    int i;
+    
     /* Draw player ship */
     draw_ship(p_player, PLAYER_SHAPE);
+    
+    /* Draw player blasters */
+    for(i = 0; i < NUM_PLAYER_SHOTS; ++i)
+    { 
+        if(p_playerblaster[i].active)
+        {
+            draw_blaster(&p_playerblaster[i]);
+        }
+    }
 
-    /* Draw alien ship */
+    /* Draw alien ships */
     for(i = 0; i < NUM_ALIENS; ++i)
     {
         if(p_alien[i].active)
         {
             draw_ship(&p_alien[i], ENEMY_SHAPE);
-            ++*alive_aliens;
-        }
-    }
-
-    /* Player blaster loop */
-    for(i = 0; i < NUM_PLAYER_SHOTS; ++i)
-    {
-        /* Clear blaster once it's left the screen */
-        if(p_playerblaster[i].pos_y < 0)
-        {
-            p_playerblaster[i].active = 0;
-            p_playerblaster[i].pos_x = 0;
-            p_playerblaster[i].pos_y = 0;
-        }
-
-        /* Draw blaster */
-        if(p_playerblaster[i].active)
-        {
-            draw_blaster(&p_playerblaster[i]);
-        }
-
-        /* Blaster hit detection */
-        for(j = 0; j < NUM_ALIENS; ++j)
-        {
-            if(
-                    p_playerblaster[i].active && 
-                    p_alien[j].active &&
-                    p_playerblaster[i].pos_x >= p_alien[j].pos_x &&
-                    p_playerblaster[i].pos_x <= (p_alien[j].pos_x + 2) &&
-                    p_playerblaster[i].pos_y <= p_alien[j].pos_y &&
-                    p_playerblaster[i].pos_y >= p_alien[j].pos_y - 2)
-            {
-                p_alien[j].pos_x = 0;
-                p_alien[j].pos_y = 0;
-                p_alien[j].active = 0;
-                p_playerblaster[i].active = 0;
-            }
+            ++*p_alivealiens;
         }
     }
 }
@@ -217,7 +195,7 @@ void move_entities(
 {
     int i;
 
-    /* Move player */
+    /* Move player ship */
     switch(ch)
     {
         case KEY_LEFT:
@@ -226,18 +204,23 @@ void move_entities(
             move_ship(p_player, max_x, 1); 
     }
 
-    /* Move blaster */
+    /* Move player blasters */
     for(i = 0; i < NUM_PLAYER_SHOTS; ++i)
     {
         if(p_playerblaster[i].active)
         {
             move_blaster(&p_playerblaster[i]);
         }
-    }
+
+        /* Clear blaster once it's left the screen */
+        if(p_playerblaster[i].pos_y < 0)
+        {
+            p_playerblaster[i].active = 0;
+            p_playerblaster[i].pos_x = 0;
+            p_playerblaster[i].pos_y = 0;
+        }
         
-    /* Shoot blaster */
-    for(i = 0; i < NUM_PLAYER_SHOTS; ++i)
-    {
+        /* Set blaster starting point */
         if(ch == KEY_UP && p_playerblaster[i].active == 0)
         {
             p_playerblaster[i].active = 1;
@@ -247,7 +230,7 @@ void move_entities(
         }
     }
 
-    /* Move aliens */
+    /* Move alien ships */
     for(i = 0; i < NUM_ALIENS; ++i)
     {
         if(tick % 3 == 0)
@@ -268,6 +251,32 @@ void move_entities(
         {
             p_alien[i].pos_y = 0;
             p_alien[i].pos_x = rand() % (max_x - 2);
+        }
+    }
+}
+
+void hit_detection(Blaster *p_playerblaster, Ship *p_alien)
+{
+    int i, j;
+   
+    /* Enemy hit detection for player blaster */ 
+    for(i = 0; i < NUM_PLAYER_SHOTS; ++i)
+    {
+        for(j = 0; j < NUM_ALIENS; ++j)
+        {
+            if(
+                    p_playerblaster[i].active && 
+                    p_alien[j].active &&
+                    p_playerblaster[i].pos_x >= p_alien[j].pos_x &&
+                    p_playerblaster[i].pos_x <= (p_alien[j].pos_x + 2) &&
+                    p_playerblaster[i].pos_y <= p_alien[j].pos_y &&
+                    p_playerblaster[i].pos_y >= p_alien[j].pos_y - 2)
+            {
+                p_alien[j].pos_x = 0;
+                p_alien[j].pos_y = 0;
+                p_alien[j].active = 0;
+                p_playerblaster[i].active = 0;
+            }
         }
     }
 }
