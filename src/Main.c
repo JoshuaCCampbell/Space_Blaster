@@ -74,17 +74,7 @@ int main(int argc, char **argv)
         int ch;
         int alive_aliens = 0;
         ch = getch();
-        clear(); /* clear the screen */
-
-        /* Draw entities */
-        draw_entities(
-                &player, 
-                player_blaster, 
-                alien, 
-                alien_blaster, 
-                &alive_aliens, 
-                max_x, 
-                max_y);
+        clear(); /* clear the screen */ 
 
         /* Move entities */
         move_entities(
@@ -96,6 +86,16 @@ int main(int argc, char **argv)
                 max_y, 
                 ch, 
                 tick);
+
+        /* Draw entities */
+        draw_entities(
+                &player, 
+                player_blaster, 
+                alien, 
+                alien_blaster, 
+                &alive_aliens, 
+                max_x, 
+                max_y);
 
         /* Hit detection */
         hit_detection(player_blaster, alien);
@@ -251,7 +251,7 @@ void move_entities(
     {
         if(p_playerblaster[i].active)
         {
-            move_blaster(&p_playerblaster[i]);
+            move_blaster(&p_playerblaster[i], 1);
         }
 
         /* Clear blaster once it's left the screen */
@@ -263,7 +263,7 @@ void move_entities(
         }
         
         /* Set blaster starting point */
-        if(ch == KEY_UP && p_playerblaster[i].active == 0)
+        if(ch == KEY_UP && !p_playerblaster[i].active)
         {
             p_playerblaster[i].active = 1;
             p_playerblaster[i].pos_x = p_player->pos_x + 1;
@@ -299,17 +299,32 @@ void move_entities(
     /* Move alien blaster */
     for(i = 0; i < NUM_ALIENS; ++i)
     {
-        if(p_alien[i].active)
+        for(j = 0; j < NUM_ALIEN_SHOTS; ++j)
         {
-            for(j = 0; j < NUM_ALIEN_SHOTS; ++j)
+            if(p_alienblaster[j][i].active)
             {
-                if(p_player->pos_x == p_alien[i].pos_x && !p_alienblaster[j][i].active)
-                {
-                    p_alienblaster[j][i].active = 1;
-                    p_alienblaster[j][i].pos_x = p_alien[i].pos_x + 1;
-                    p_alienblaster[j][i].pos_y = p_alien[i].pos_y + 1;
-                }
+                move_blaster(&p_alienblaster[j][i], 0);
             }
+
+            if(p_alienblaster[j][i].pos_y > max_y)
+            {
+                p_alienblaster[j][i].active = 0;
+                p_alienblaster[j][i].pos_x = 0;
+                p_alienblaster[j][i].pos_y = 0;
+            }
+
+            if(
+                    p_player->pos_x >= p_alien[i].pos_x &&
+                    p_player->pos_x <= (p_alien[i].pos_x + 3) &&
+                    !p_alienblaster[i][j].active &&
+                    p_alien[i].active
+                    )
+            {
+                p_alienblaster[j][i].active = 1;
+                p_alienblaster[j][i].pos_x = p_alien[i].pos_x + 1;
+                p_alienblaster[j][i].pos_y = p_alien[i].pos_y + 1;
+                break;
+            } 
         }
     }
 }

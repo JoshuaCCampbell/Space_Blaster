@@ -16,7 +16,15 @@ void draw_blaster(Blaster *p_blaster)
     addch('o');
 }
 
-void move_blaster(Blaster *p_blaster)
+void move_blaster(Blaster *p_blaster, int direction)
 {
-    p_blaster->pos_y -= p_blaster->vel_y;
+    
+    if(direction == 1)
+    { 
+            p_blaster->pos_y -= p_blaster->vel_y;
+    }
+    else if(direction == 0)
+    {
+            p_blaster->pos_y += p_blaster->vel_y;
+    }
 }

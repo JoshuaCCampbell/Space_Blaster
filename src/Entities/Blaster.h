@@ -7,4 +7,4 @@ typedef struct _ENTITY_blaster
 
 void init_blaster(Blaster *blaster, int velocity);
 void draw_blaster(Blaster *blaster);
-void move_blaster(Blaster *blaster);
+void move_blaster(Blaster *blaster, int direction);
